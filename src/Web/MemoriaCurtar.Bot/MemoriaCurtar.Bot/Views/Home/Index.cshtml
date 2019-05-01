@@ -21,7 +21,10 @@
                 </div>
 
 
-                <button type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn-primary">Procurar</Button>
+                <button type="submit" value="Subscribe" name="subscribe" id="submitbtn" class="btn btn-primary">Procurar</Button>
+                <div id="contactFormLoad" class="spinner-border text-dark" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
             </form>
 
 
@@ -48,7 +51,7 @@
                 `
 
 <div class="card" style="width: 100%;margin-top: 12px">
-  <img src="${data.news.linkToScreenshot}" class="card-img-top" style="height:150px;width:100%;object-fit:cover">
+  <img src="${data.news.linkToScreenshot}" class="card-img-top" style="height:150px;width:100%;object-fit:none;object-position:50% 0">
             <ul class="list-group list-group-flush">
 ${lis}
             </ul>
@@ -62,10 +65,21 @@ ${lis}
         }
 
         function handleForm() {
+            
             var query = $("#form_search").val();
+            if (query === "")
+                return false;
+
+            $("#quotes").empty();
+            $("#submitbtn").hide();
+            $("#contactFormLoad").fadeIn();
+
             $.get(
                 "/home/search?q=" + query,
                 function (response) {
+
+                    $("#submitbtn").fadeIn();
+                    $("#contactFormLoad").hide();
                     for (var i = 0; i < response.length; i++) {
                         AddQuote(response[i]);
                     }
@@ -75,5 +89,7 @@ ${lis}
 
             return false;
         }
+
+     
     </script>
 </div>
