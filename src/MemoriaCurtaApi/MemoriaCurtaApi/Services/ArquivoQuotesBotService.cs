@@ -54,7 +54,7 @@ namespace MemoriaCurtaApi.Services
             if ((command == "/start") || (command == "/ajuda"))
             {
                 await _telegramBot.Client.SendTextMessageAsync(_message.From.Id,
-                            string.Format("Olá eu sou o Bot Memória Curta e estou aqui ajudar a recordar citações de personalidades!\n " +
+                            string.Format("Olá eu sou o Bot Memória Curta e estou aqui para ajudar a recordar citações de personalidades!\n " +
                             "Diga-me quem procurar enviando uma mensagem da forma: = <nome da personalidade>\n" +
                             "Por exemplo: = António Costa\n" +
                             "Se quiser ver outra vez esta mensagem basta enviar o comando /ajuda.\n" +
