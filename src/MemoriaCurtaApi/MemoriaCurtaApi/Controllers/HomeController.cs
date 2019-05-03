@@ -16,7 +16,7 @@ namespace MemoriaCurtar.Bot.Controllers
 {
     public class HomeController : Controller
     {
-        private string fbToken = "mytoken";
+        private string fbToken = "EAAGo28yQZCPgBAHlxNLvyfbRuEscvoyD6W1kZA56apsgBDdOFyMI89TnoPZC2mz5wBw0Gp8O9W2ZCRNBDx5AklNTZCF4TqF1YI8Tr2pGIHX13sUIBNNjJfhQ2NSYZAgepzWTrMt6KsrQq6eZBgjmYMcxRdMHHDoxJvMr8ZAYPjkcUgZDZD";
         private string postUrl = "https://graph.facebook.com/v2.9/{0}/messages";
         private const string facebookurl = "https://graph.facebook.com/v2.9/";
         private string ConversationMessages = facebookurl + "{0}?fields=messages.fields(message,from)";
@@ -57,7 +57,7 @@ namespace MemoriaCurtar.Bot.Controllers
         public async Task<JsonResult> Search(string query)
         {
             var ser = new MemoriaCurtaService();
-            var res  = await ser.Process(" " + query);
+            var res  = await ser.ProcessClassifierQuotes(" " + query);
             return Json(res);
         }
 

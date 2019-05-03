@@ -44,8 +44,13 @@ namespace MemoriaCurtaAPI.Services
 
                 for (int i = 0; i < doc.quotes().size(); i++)
                 {
-                    CoreQuote q = (CoreQuote)doc.quotes().get(i);
-                    quotes.Add(new MCQuote(q));
+                    try
+                    {
+                        CoreQuote q = (CoreQuote)doc.quotes().get(i);
+                        quotes.Add(new MCQuote(q));
+                    }
+                    catch (Exception e)
+                    { }
                 }
 
                 Directory.SetCurrentDirectory(curDir);
@@ -59,9 +64,14 @@ namespace MemoriaCurtaAPI.Services
 
         public async Task Inicializer()
         {
+            /*string BaseDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"../../../"));
+
+            string MODEL_PATH_DEFAULT = System.IO.Path.GetFullPath(BaseDirectory + "/Resources/es/");*/
+
             string BaseDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\"));
 
             string MODEL_PATH_DEFAULT = System.IO.Path.GetFullPath(BaseDirectory + "\\Resources\\es\\");
+
 
             _modelPath = MODEL_PATH_DEFAULT;
             SetupCoreNLP();
@@ -88,6 +98,7 @@ namespace MemoriaCurtaAPI.Services
 
                 props.load(new FileReader(propsFile));
                 props.put("ner.useSUTime", "0");
+                props.put("threads", "10");
                 props.put("tokenize.verbose", "true");
                 props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, depparse, kbp, coref,entitymentions, quote");
 

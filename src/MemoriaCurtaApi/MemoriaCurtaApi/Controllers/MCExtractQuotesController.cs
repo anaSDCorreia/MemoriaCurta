@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MemoriaCurtaApi.Services;
@@ -25,27 +26,60 @@ namespace MemoriaCurtaAPI.Controllers
             _arquivoQuotesService = s;
     }
 
+        /* [HttpPost]
+         public async Task<IActionResult> Post([FromBody]Update update)
+         {
+             var date = DateTime.Now - update.Message.Date;
+
+             if (date.TotalMinutes < 70)
+             {
+                 await _arquivoQuotesService.ReceiveMessageTelegram(update);
+             }
+
+             return Ok();
+         }*/
+
+        static int id = 0;
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]Update update)
+        public async Task Post([FromBody]Update update)
         {
-            await _arquivoQuotesService.ReceiveMessageTelegram(update);
-            return Ok();
+            try {
+
+                if (update == null || update.Message == null)
+                    return;
+
+                if (update.Message.Date != null)
+                {
+                    var date = DateTime.UtcNow - update.Message.Date;
+
+                    if (id == update.Id)
+                        return;
+
+                    id = update.Id;
+                    if (date.TotalSeconds < 5)
+                    {
+                        Debug.WriteLine(" Message Text= " + update.Message.Text + " Chat Id= " + update.Message.Chat.Id);
+                        await _arquivoQuotesService.ReceiveMessageTelegram(update);
+                    }
+                }
+                else {
+                    Debug.WriteLine(" Message Text= " + update.Message.Text + " Chat Id= " + update.Message.Chat.Id);
+                    await _arquivoQuotesService.ReceiveMessageTelegram(update);
+                }
+               
+
+                
+
+
+            }
+            catch (Exception e){
+                int y = 0;
+            }
+            
+           
         }
 
-        // GET: api/MCExtractQuotes
-        [HttpGet]
-        public  IEnumerable<string> Get()
-        {
-           // string sb = "António Costa defende que, na criação da moeda única, houve um \"excesso de voluntarismo político\" e nem todos terão percebido que \"o euro foi o maior bónus à competitividade da economia alemã que a Europa lhe poderia ter oferecido\".";
-
-            /*var quotes = await _quoteExtractService.GetQuotes(sb);
-
-            var quot = quotes.Select((q) => q.Quote);
-
-            return quot.ToArray();*/
-            return new string[] { "asdsad", "asdsad"};
-        }
-
+        
        
     }
 }

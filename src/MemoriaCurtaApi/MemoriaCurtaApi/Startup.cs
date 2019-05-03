@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MemoriaCurtaApi.Services;
 using MemoriaCurtaApi.Services.Bots;
 using MemoriaCurtaAPI.Services;
+using MemoriaCurtar.Bot.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,13 +33,13 @@ namespace MemoriaCurtaApi
 
             var classifierService = new SpanishCoreNLPClassfier();
 
-            // classifierService.Inicializer();
+            classifierService.Inicializer();
 
             services.AddSingleton<MCTelegramBot>();
 
             services.AddSingleton<ArquivoQuotesBotService>();
 
-
+            services.AddSingleton<MemoriaCurtaService>();
             services.AddSingleton<IClassifierService>(classifierService);
 
             var section = Configuration.GetSection("BotConfiguration");
@@ -58,9 +59,15 @@ namespace MemoriaCurtaApi
             {
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseStaticFiles();
+            //app.UseMiddleware<StaticFileMiddleware>(new StaticFileOptions());
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
         }
     }
 }

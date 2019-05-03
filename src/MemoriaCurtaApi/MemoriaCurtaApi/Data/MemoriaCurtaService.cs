@@ -2,8 +2,10 @@
 using MemoriaCurtaAPI.Services;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MemoriaCurtar.Bot.Models
@@ -49,7 +51,7 @@ Examples:
 
             var query = text.Substring(1);
 
-            var resp = await new ArquivoAgent().Search(query, 20, sites: NewsSites);
+            var resp = await new ArquivoAgent().Search(query, 1, sites: NewsSites);
 
             var tasks = resp.response_items.Select(item => Task.Run(() => DumbQuotes(item, text.Split(' '))));
 
@@ -66,6 +68,44 @@ Examples:
                     return null;
                 }
             }).Where(t => t?.Quotes != null && t.Quotes.Count != 0).ToList();
+        }
+
+        public async Task<ICollection<NewsQuotes>> ProcessClassifierQuotes(string text)
+        {
+            List<NewsQuotes> quotes = new List<NewsQuotes>();
+
+            var query = text.Substring(1);
+
+            var resp = await new ArquivoAgent().Search(query, 10, sites: NewsSites);
+
+            foreach (var item in resp.response_items)
+            {
+                var newsQuotes = await ClassifierQuotes(item, query);
+                quotes.Add(newsQuotes);
+
+            }
+
+            return quotes.Where(t => t?.Quotes != null && t.Quotes.Count != 0).ToList();
+
+/*
+            var tasks = resp.response_items.Select(item => Task.Run(() => ClassifierQuotes(item, query)));
+
+            await Task.WhenAll(tasks);
+
+            return tasks.Select(t =>
+            {
+                try
+                {
+                    return t.Result;
+                }
+                catch (Exception e)
+                {
+                    return null;
+                }
+                
+            }).Where(t => t?.Quotes != null && t.Quotes.Count != 0).ToList();
+
+    */
         }
 
         public class NewsQuotes
@@ -86,6 +126,39 @@ Examples:
             {
                 News = item,
                 Quotes = quotes
+            };
+        }
+
+        private async Task<NewsQuotes> ClassifierQuotes(ResponseItem item, string keyword)
+        {
+            var extractedText = await GetString(item.linkToExtractedText);
+
+            var quotes = await _quoteService.GetQuotes(extractedText);
+             
+            var finalQuotes = new List<string>();
+
+            var key = keyword.Normalize(NormalizationForm.FormD);
+            var chars = key.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray();
+             key = new string(chars).Normalize(NormalizationForm.FormC);
+            key = key.Replace(" ", "");
+            foreach (var q in quotes)
+            {
+                var subject = q.Speaker.ToUpper().Normalize(NormalizationForm.FormD);
+                var charss = subject.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray();
+                subject = new string(charss).Normalize(NormalizationForm.FormC);
+
+                subject = subject.Replace(" ", "");
+                if (subject.ToLower() == key.ToLower())
+                {
+                    if(q.Quote.Length > 5)
+                        finalQuotes.Add(q.Quote); 
+                }
+            }
+
+            return new NewsQuotes
+            {
+                News = item,
+                Quotes = finalQuotes
             };
         }
 

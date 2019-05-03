@@ -25,9 +25,8 @@ namespace MemoriaCurtaAPI.Data
         {
             Quote = q.text();
 
-            Speaker = q.speaker().get().ToString();
+            Speaker = q.speaker()!= null ? q.speaker().get().ToString(): "";
 
-            CanonicalSpeaker = q.canonicalSpeaker().get().ToString();
         }
     }
 }
