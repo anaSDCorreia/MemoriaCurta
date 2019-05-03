@@ -54,12 +54,10 @@ namespace MemoriaCurtaApi.Services
             if ((command == "/start") || (command == "/ajuda"))
             {
                 await _telegramBot.Client.SendTextMessageAsync(_message.From.Id,
-                            string.Format("Ola eu sou Memoria Curta Bot e estou aqui para a ajudar a encontrar citações de personalidades.\n " +
-                            "Para realizar uma procura basta seguir o seguinte formato:  =<query> \n Examples:" +
-                            "= ImaginationOverflow \n" +
-                            "= António Costa \n" +
-                            "= Cristiano Ronaldo.\n" +
-                            "Se quiser ver outra vez esta mensagem basta inseir o comando /ajuda .\n" +
+                            string.Format("Olá eu sou o Bot Memoria Curta e estou aqui ajudar a recordar citações de personalidades!\n " +
+                            "Diga-me quem procurar enviando uma mensagem da forma: = <nome da personalidade>\n" +
+                            "Por exemplo: = António Costa\n" +
+                            "Se quiser ver outra vez esta mensagem basta enviar o comando /ajuda.\n" +
                             "Powered by arquivo.pt!"));
             }
 
@@ -68,26 +66,26 @@ namespace MemoriaCurtaApi.Services
                 try
                 {
                     await _telegramBot.Client.SendTextMessageAsync(_message.Chat.Id,
-                            string.Format("For recebido o pedido de pesquisa. Vamos agora analiza-lo. Esta operação pode levar alguns minutos. "));
+                            string.Format("A procurar citações... Posso demorar alguns minutos!"));
                     var responses = await _mcService.ProcessClassifierQuotes(command);
 
                     await _telegramBot.Client.SendTextMessageAsync(_message.Chat.Id,
-                           string.Format("Foi encontrado {0} citações do {1} em {2} noticias ", responses.Sum(c => c.Quotes.Count), command.Substring(1), responses.Count));
+                           string.Format("Encontrei {0} citações de {1} em {2} noticias!", responses.Sum(c => c.Quotes.Count), command.Substring(1), responses.Count));
 
                     foreach (var quote in responses)
                     {
                         System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
                         var date = dtDateTime.AddSeconds(Int64.Parse(quote.News.date)).ToLocalTime();
                      
-                        var str = quote.Quotes.Select(q => $"{q}" + " " + command.Substring(1) + " em " + date.ToString("MM/dd/yyyy")).Aggregate((s1, s2) => $"{ s1}\n\n{s2}");
+                        var str = quote.Quotes.Select(q => $"{q}" + ", " + command.Substring(1) + " em " + date.ToString("yyyy/MM/dd")).Aggregate((s1, s2) => $"{ s1}\n\n{s2}");
 
                         await _telegramBot.Client.SendTextMessageAsync(_message.Chat.Id,
-                            string.Format("Quotes:\n\n{1}\n\nLink to reference: {0}", quote.News.linkToArchive, str));
+                            string.Format("Citações:\n\n{1}\n\nFonte: {0}", quote.News.linkToArchive, str));
 
                     }
 
                     await _telegramBot.Client.SendTextMessageAsync(_message.Chat.Id,
-                            string.Format("Showed {0} quotes in {1} news", responses.Sum(c => c.Quotes.Count), responses.Count));
+                            string.Format("{0} citações em {1} notícias.", responses.Sum(c => c.Quotes.Count), responses.Count));
                  
                 }
                 catch (Exception e)
